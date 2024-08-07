@@ -1,5 +1,8 @@
 <template>
-  <div :id="id" />
+  <div>
+    <input type="file" accept=".md" @change="openFile">
+    <div :id="id" />
+  </div>
 </template>
 
 <script>
@@ -112,10 +115,27 @@ export default {
     },
     getHtml() {
       return this.editor.getHtml()
+    },
+    openFile(event) {
+      const file = event.target.files[0]
+      if (file) {
+        const fileExtension = file.name.split('.').pop().toLowerCase()
+        if (fileExtension === 'md') {
+          const reader = new FileReader()
+          reader.onload = (e) => {
+            const content = e.target.result
+            this.setValue(content)
+          }
+          reader.readAsText(file)
+        } else {
+          alert('Please select a valid Markdown file.')
+        }
+      }
     }
   }
 }
 </script>
+
 <style>
 .tui-editor .te-preview-style-vertical .te-preview {
     float: left;
