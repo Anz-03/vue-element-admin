@@ -116,3 +116,9 @@ export default {
   }
 }
 </script>
+<style>
+.tui-editor .te-preview-style-vertical .te-preview {
+    float: left;
+    width: auto;
+}
+</style>
