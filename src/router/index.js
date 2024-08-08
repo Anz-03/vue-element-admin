@@ -184,6 +184,19 @@ export const asyncRoutes = [
     ]
   },
 
+  {
+    path: '/office',
+    component: Layout,
+    children: [
+      {
+        path: 'index',
+        component: () => import('@/views/office/index'),
+        name: 'Office',
+        meta: { title: 'Office', icon: 'icon', noCache: true }
+      }
+    ]
+  },
+
   /** when your routing map is too long, you can split it into small modules **/
   componentsRouter,
   chartsRouter,
