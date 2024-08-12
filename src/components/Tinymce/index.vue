@@ -115,6 +115,58 @@ export default {
     initTinymce() {
       const _this = this
       window.tinymce.init({
+        file_picker_callback: function(callback, value, meta) {
+        // 文件分类
+          var filetype = '.pdf, .txt, .zip, .rar, .7z, .doc, .docx, .xls, .xlsx, .ppt, .pptx, .mp3, .mp4'
+          // 后端接收上传文件的地址
+          var upurl = '/demo/upfile.php'
+
+          // 为不同插件指定文件类型及后端地址
+          switch (meta.filetype) {
+            case 'image':
+              filetype = '.jpg, .jpeg, .png, .gif'
+              upurl = 'upimg.php'
+              break
+            case 'media':
+              filetype = '.mp3, .mp4'
+              upurl = 'upfile.php'
+              break
+            case 'file':
+            default:
+          }
+          // 模拟出一个input用于添加本地文件
+          var input = document.createElement('input')
+          input.setAttribute('type', 'file')
+          input.setAttribute('accept', filetype)
+          input.click()
+          input.onchange = function() {
+            var file = this.files[0]
+
+            var xhr, formData
+            console.log(file.name)
+            xhr = new XMLHttpRequest()
+            xhr.withCredentials = false
+            xhr.open('POST', upurl)
+            xhr.onload = function() {
+              var json
+              if (xhr.status !== 200) {
+                console.error('HTTP Error: ' + xhr.status)
+                return
+              }
+              json = JSON.parse(xhr.responseText)
+              if (!json || typeof json.location !== 'string') {
+                console.error('Invalid JSON: ' + xhr.responseText)
+                return
+              }
+              callback(json.location)
+            }
+            formData = new FormData()
+            formData.append('file', file, file.name)
+            xhr.send(formData)
+          }
+        },
+        // images_upload_url: '/demo/upimg.js',
+        // images_upload_base_path: 'http://localhost:3000/upload',
         selector: `#${this.tinymceId}`,
         language: this.languageTypeList['en'],
         height: this.height,
@@ -205,6 +257,18 @@ export default {
     },
     imageSuccessCBK(arr) {
       arr.forEach(v => window.tinymce.get(this.tinymceId).insertContent(`<img class="wscnph" src="${v.url}" >`))
+    },
+    imageUploadHandler(blobInfo, success, failure) {
+      const formData = new FormData()
+      formData.append('file', blobInfo.blob(), blobInfo.filename())
+
+      fetch('http://localhost:3000/upload', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(json => success(json.location))
+        .catch(error => failure(error.message))
     }
   }
 }

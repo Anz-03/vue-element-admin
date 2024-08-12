@@ -1,49 +1,38 @@
 <template>
-  <div class="office-editor">
-    <iframe
-      v-if="fileUrl"
-      :src="fileUrl"
-      width="100%"
-      height="100%"
-      frameborder="0"
-      allowfullscreen
-    />
-    <div v-else>
-      <p>No file selected</p>
+  <div>
+    <input type="file" @change="handleFileUpload">
+    <div v-if="documentUrl">
+      <iframe :src="documentUrl" width="100%" height="600px" />
     </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'OfficeEditor',
   data() {
     return {
-      fileUrl: null // URL of the document to edit
+      documentUrl: null
     }
   },
-  mounted() {
-    // Example URL, replace with dynamic URL or logic as needed
-    this.fileUrl = this.getOfficeFileUrl('example-document-url')
-  },
   methods: {
-    getOfficeFileUrl(documentId) {
-      // Replace with your Office Online URL and parameters
-      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(documentId)}`
+    handleFileUpload(event) {
+      const file = event.target.files[0]
+      if (file) {
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          // Convert file to a data URL
+          this.documentUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(e.target.result)}`
+        }
+        reader.readAsDataURL(file)
+      }
     }
   }
 }
 </script>
 
 <style scoped>
-.office-editor {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
 iframe {
-  width: 100%;
-  height: 100%;
+  border: none;
 }
 </style>
+
